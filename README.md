@@ -9,7 +9,7 @@ The main and bash script are here to test my implementation against the std.
 
 ## Usage
 ```
->$ ./testeur
+>$ ./tester
 ```
 ### To only compile the main with my implementation
 ```
