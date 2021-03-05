@@ -1,5 +1,5 @@
 # 42_ft_containers
-Recoding std::list, std::vector, std::map, std::stack and std::queue as a project for the 42Paris coding school.
+Recoding std::list, std::vector, std::map, std::stack and std::queue as project for the 42Paris coding school.
 To call it, use the namespace ft:: instead of std:: like this:
 ```
 ft::list<int> lst;
