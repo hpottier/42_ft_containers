@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/13 11:19:56 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/04 16:53:30 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/08 20:35:36 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,42 @@
 
 namespace ft
 {
+	/* remove_const */
+
+	template <typename T>
+	struct remove_const
+	{
+		typedef T type;
+	};
+
+	template <typename T>
+	struct remove_const<const T>
+	{
+		typedef T type;
+	};
+
+	/* remove_volatile */
+
+	template <typename T>
+	struct remove_volatile
+	{
+		typedef T type;
+	};
+
+	template <typename T>
+	struct remove_volatile<volatile T>
+	{
+		typedef T type;
+	};
+
+	/* remove_cv */
+
+	template <typename T>
+	struct remove_cv
+	{
+		typedef typename remove_const<typename remove_volatile<T>::type>::type type;
+	};
+
 	/* enable_if */
 
 	template <bool B, class T = void>
@@ -30,6 +66,14 @@ namespace ft
 	{
 		typedef T type;
 	};
+
+	/* is_pointer */
+
+	template <typename T>
+	struct is_pointer { static const bool value = false; };
+
+	template <typename T>
+	struct is_pointer<T *> { static const bool value = true; };
 
 	/* is_input_iterator */
 
@@ -49,7 +93,10 @@ namespace ft
 	};
 
 	template <bool, class T>
-	struct _is_input_iterator {};
+	struct _is_input_iterator
+	{
+		static const bool value = false;
+	};
 
 	template <class T>
 	struct _is_input_iterator<true, T>
@@ -64,8 +111,26 @@ namespace ft
 		static const bool value = sizeof(_test(static_cast<typename T::iterator_category *>(NULL))) == sizeof(_yes);
 	};
 
+	// template <class T>
+	// struct is_input_iterator : public _is_input_iterator<_has_iterator_category<T>::value, T>;
+
 	template <class T>
-	struct is_input_iterator : public _is_input_iterator<_has_iterator_category<T>::value, T> {};
+	struct is_input_iterator
+	{
+		static const bool value = _is_input_iterator<_has_iterator_category<T>::value, T>::value || is_pointer<T>::value;
+	};
+
+	/* binary_function */
+
+	template <typename T1, typename T2, typename U>
+	struct binary_function
+	{
+		typedef T1 first_argument_type;
+
+		typedef T2 second_argument_type;
+
+		typedef U result_type;
+	};
 
 	/* less */
 

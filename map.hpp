@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/06 13:14:27 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/05 11:41:34 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/08 21:42:14 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstddef>
 #include "reverse_iterator.hpp"
 #include "ft_utility.hpp"
+#include "ft_allocator.hpp"
 
 namespace ft
 {
@@ -37,7 +38,7 @@ namespace ft
 		typedef typename std::size_t size_type;
 		typedef typename std::ptrdiff_t difference_type;
 
-		class value_compare
+		class value_compare : public ft::binary_function<value_type, value_type, bool>
 		{
 			friend class map;
 
@@ -203,7 +204,7 @@ namespace ft
 				else if (_pos == _mend->right)
 				{
 					_pos = _mend;
-					return *tmp;
+					return tmp;
 				}
 				if (_pos->left != NULL)
 				{
@@ -288,7 +289,7 @@ namespace ft
 
 			_map_const_iterator operator++(int)
 			{
-				_map_iterator tmp = *this;
+				_map_const_iterator tmp = *this;
 				if (_pos->right != NULL)
 				{
 					if (_pos->right->left == NULL || _pos->right == _mend)
@@ -338,7 +339,7 @@ namespace ft
 
 			_map_const_iterator operator--(int)
 			{
-				_map_iterator tmp = *this;
+				_map_const_iterator tmp = *this;
 				if (_pos == _mend)
 				{
 					if (_mend->left != NULL)
@@ -348,7 +349,7 @@ namespace ft
 				else if (_pos == _mend->right)
 				{
 					_pos = _mend;
-					return *tmp;
+					return tmp;
 				}
 				if (_pos->left != NULL)
 				{
@@ -367,6 +368,21 @@ namespace ft
 				return tmp;
 			}
 		};
+
+		const _node *search(const key_type &k, _node *curr) const
+		{
+			if (curr != NULL)
+			{
+				bool ret = _comp(curr->data.first, k);
+				if (ret == false && _comp(k, curr->data.first) == false)
+					return curr;
+				else if (ret == false)
+					return this->search(k, curr->left);
+				else if (curr->right != _end)
+					return this->search(k, curr->right);
+			}
+			return NULL;
+		}
 
 		_node *search(const key_type &k, _node *curr)
 		{
@@ -561,14 +577,16 @@ namespace ft
 
 		map &operator=(const map &x)
 		{
+			this->clear();
 			_alloc = x._alloc;
 			_size = 0;
 			_comp = x._comp;
-			_end = new _node;
 			_end->origin = NULL;
 			_end->left = NULL;
 			_end->right = NULL;
-			this->insert(x.begin(), x.end());
+			if (x._size != 0)
+				this->insert(x.begin(), x.end());
+			return *this;
 		}
 
 		~map()
@@ -580,11 +598,15 @@ namespace ft
 
 		iterator begin()
 		{
+			if (_size == 0)
+				return this->end();
 			return iterator(_end->right, _comp, _end);
 		}
 
 		const_iterator begin() const
 		{
+			if (_size == 0)
+				return this->end();
 			return const_iterator(_end->right, _comp, _end);
 		}
 
@@ -600,22 +622,26 @@ namespace ft
 
 		reverse_iterator rbegin()
 		{
-			return reverse_iterator(iterator(_end->left, _comp, _end));
+			if (_size == 0)
+				return this->rend();
+			return reverse_iterator(this->end());
 		}
 
 		const_reverse_iterator rbegin() const
 		{
-			return const_reverse_iterator(const_iterator(_end->left, _comp, _end));
+			if (_size == 0)
+				return this->rend();
+			return const_reverse_iterator(this->end());
 		}
 
 		reverse_iterator rend()
 		{
-			return reverse_iterator(iterator(_end, _comp, _end));
+			return reverse_iterator(this->begin());
 		}
 
 		const_reverse_iterator rend() const
 		{
-			return const_reverse_iterator(const_iterator(_end, _comp, _end));
+			return const_reverse_iterator(this->begin());
 		}
 
 		bool empty() const
@@ -706,7 +732,7 @@ namespace ft
 		iterator insert(iterator position, const value_type &val)
 		{
 			(void)position;
-			return iterator(this->search(this->insert(val).first), _comp, _end);
+			return this->insert(val).first;
 		}
 
 		template <class InputIterator>
@@ -929,7 +955,7 @@ namespace ft
 
 		value_compare value_comp() const
 		{
-			return value_comp(_comp);
+			return value_compare(_comp);
 		}
 
 		iterator find(const key_type &k)
@@ -1005,6 +1031,67 @@ namespace ft
 			return ft::make_pair(this->lower_bound(k), this->upper_bound(k));
 		}
 	};
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator==(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		if (lhs.size() == rhs.size())
+		{
+			typename map<Key, T, Compare, Alloc>::const_iterator lit(lhs.begin());
+			typename map<Key, T, Compare, Alloc>::const_iterator rit(rhs.begin());
+			while (lit != lhs.end())
+			{
+				if (*lit != *rit)
+					return false;
+				++lit;
+				++rit;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator!=(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator<(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		typename map<Key, T, Compare, Alloc>::const_iterator lit = lhs.begin();
+		typename map<Key, T, Compare, Alloc>::const_iterator rit = rhs.begin();
+
+		while (lit != lhs.end())
+		{
+			if (rit == rhs.end() || *rit < *lit)
+				return false;
+			else if (*lit < *rit)
+				return true;
+			++lit;
+			++rit;
+		}
+		return rit != rhs.end();
+	}
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator<=(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator>(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		return rhs < lhs;
+	}
+
+	template <class Key, class T, class Compare, class Alloc>
+	bool operator>=(const map<Key, T, Compare, Alloc> &lhs, const map<Key, T, Compare, Alloc> &rhs)
+	{
+		return !(lhs < rhs);
+	}
 
 	template <class Key, class T, class Compare, class Alloc>
 	void swap(map<Key, T, Compare, Alloc> &x, map<Key, T, Compare, Alloc> &y)

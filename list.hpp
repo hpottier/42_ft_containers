@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/07 14:52:02 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/05 11:38:22 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/08 21:59:02 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstddef>
 #include "reverse_iterator.hpp"
 #include "ft_utility.hpp"
+#include <iostream>
 #include "ft_allocator.hpp"
 
 namespace ft
@@ -54,7 +55,7 @@ namespace ft
 
 		typedef struct _snode : public _snode_base
 		{
-			value_type data;
+			pointer data;
 		} _node;
 
 		typedef struct _snode_end : public _snode_base
@@ -111,12 +112,12 @@ namespace ft
 
 			reference operator*()
 			{
-				return static_cast<_node *>(_pos)->data;
+				return *(static_cast<_node *>(_pos)->data);
 			}
 
 			pointer operator->()
 			{
-				return &(static_cast<_node *>(_pos)->data);
+				return static_cast<_node *>(_pos)->data;
 			}
 
 			_list_iterator &operator++()
@@ -180,12 +181,12 @@ namespace ft
 
 			const_reference operator*()
 			{
-				return static_cast<const _node *>(_pos)->data;
+				return *(static_cast<const _node *>(_pos)->data);
 			}
 
 			const_pointer operator->()
 			{
-				return &(static_cast<const _node *>(_pos)->data);
+				return static_cast<const _node *>(_pos)->data;
 			}
 
 			_list_const_iterator &operator++()
@@ -239,6 +240,8 @@ namespace ft
 			_node_end *end = new _node_end;
 			end->size = 0;
 			_end = static_cast<_node_base *>(end);
+			_end->next = _end;
+			_end->prev = _end;
 			for (size_type i = 0; i < n; ++i)
 				push_back(val);
 		}
@@ -249,6 +252,8 @@ namespace ft
 			_node_end *end = new _node_end;
 			end->size = 0;
 			_end = static_cast<_node_base *>(end);
+			_end->next = _end;
+			_end->prev = _end;
 			while (first != last)
 			{
 				push_back(*first);
@@ -261,6 +266,8 @@ namespace ft
 			_node_end *end = new _node_end;
 			end->size = 0;
 			_end = static_cast<_node_base *>(end);
+			_end->next = _end;
+			_end->prev = _end;
 			iterator it(x._end);
 			while ((++it)._pos != x._end)
 				push_back(*it);
@@ -269,10 +276,10 @@ namespace ft
 		list &operator=(const list &x)
 		{
 			clear();
-			static_cast<_node_end *>(_end)->size = static_cast<_node_end *>(x._end)->size;
 			iterator it(x._end);
 			while ((++it)._pos != x._end)
 				push_back(*it);
+			return *this;
 		}
 
 		~list()
@@ -280,13 +287,15 @@ namespace ft
 			if (static_cast<_node_end *>(_end)->size != 0)
 			{
 				_node_base *curr = _end->next->next;
-				_alloc.destroy(&static_cast<_node *>(curr->prev)->data);
-				::operator delete(curr->prev);
+				_alloc.destroy(static_cast<_node *>(curr->prev)->data);
+				_alloc.deallocate(static_cast<_node *>(curr->prev)->data, sizeof(value_type));
+				::operator delete(static_cast<_node *>(curr->prev));
 				while (curr != _end)
 				{
 					curr = curr->next;
-					_alloc.destroy(&static_cast<_node *>(curr->prev)->data);
-					::operator delete(curr->prev);
+					_alloc.destroy(static_cast<_node *>(curr->prev)->data);
+					_alloc.deallocate(static_cast<_node *>(curr->prev)->data, sizeof(value_type));
+					::operator delete(static_cast<_node *>(curr->prev));
 				}
 			}
 			::operator delete(_end);
@@ -314,22 +323,22 @@ namespace ft
 
 		reverse_iterator rbegin()
 		{
-			return reverse_iterator(iterator(_end->prev));
+			return reverse_iterator(this->end());
 		}
 
 		const_reverse_iterator rbegin() const
 		{
-			return reverse_const_iterator(const_iterator(_end->prev));
+			return reverse_const_iterator(this->end());
 		}
 
 		reverse_iterator rend()
 		{
-			return reverse_iterator(iterator(_end));
+			return reverse_iterator(this->begin());
 		}
 
 		const_reverse_iterator rend() const
 		{
-			return reverse_const_iterator(const_iterator(_end));
+			return reverse_const_iterator(this->begin());
 		}
 
 		bool empty() const
@@ -349,22 +358,22 @@ namespace ft
 
 		reference front()
 		{
-			return static_cast<_node *>(_end->next)->data;
+			return *(static_cast<_node *>(_end->next)->data);
 		}
 
 		const_reference front() const
 		{
-			return static_cast<_node *>(_end->next)->data;
+			return *(static_cast<_node *>(_end->next)->data);
 		}
 
 		reference back()
 		{
-			return static_cast<_node *>(_end->prev)->data;
+			return *(static_cast<_node *>(_end->prev)->data);
 		}
 
 		const_reference back() const
 		{
-			return static_cast<_node *>(_end->prev)->data;
+			return *(static_cast<_node *>(_end->prev)->data);
 		}
 
 		template <class InputIterator>
@@ -390,16 +399,18 @@ namespace ft
 			if (static_cast<_node_end *>(_end)->size != 0)
 			{
 				_node_base *tmp = _end->next;
-				_end->next = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(_end->next)->data, val);
+				_end->next = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(_end->next)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(_end->next)->data, val);
 				_end->next->prev = _end;
 				_end->next->next = tmp;
 				tmp->prev = _end->next;
 			}
 			else
 			{
-				_end->next = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(_end->next)->data, val);
+				_end->next = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(_end->next)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(_end->next)->data, val);
 				_end->next->prev = _end;
 				_end->next->next = _end;
 				_end->prev = _end->next;
@@ -410,8 +421,9 @@ namespace ft
 		void pop_front()
 		{
 			_node_base *tmp = _end->next->next;
-			_alloc.destroy(&static_cast<_node *>(_end->next)->data);
-			::operator delete(_end->next);
+			_alloc.destroy(static_cast<_node *>(_end->next)->data);
+			_alloc.deallocate(static_cast<_node *>(_end->next)->data, sizeof(value_type));
+			::operator delete(static_cast<_node *>(_end->next));
 			if (tmp != _end)
 			{
 				_end->next = tmp;
@@ -430,16 +442,18 @@ namespace ft
 			if (static_cast<_node_end *>(_end)->size != 0)
 			{
 				_node_base *tmp = _end->prev;
-				_end->prev = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(_end->prev)->data, val);
+				_end->prev = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(_end->prev)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(_end->prev)->data, val);
 				_end->prev->next = _end;
 				_end->prev->prev = tmp;
 				tmp->next = _end->prev;
 			}
 			else
 			{
-				_end->prev = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(_end->prev)->data, val);
+				_end->prev = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(_end->prev)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(_end->prev)->data, val);
 				_end->prev->next = _end;
 				_end->prev->prev = _end;
 				_end->next = _end->prev;
@@ -450,8 +464,9 @@ namespace ft
 		void pop_back()
 		{
 			_node_base *tmp = _end->prev->prev;
-			_alloc.destroy(&static_cast<_node *>(_end->prev)->data);
-			::operator delete(_end->prev);
+			_alloc.destroy(static_cast<_node *>(_end->prev)->data);
+			_alloc.deallocate(static_cast<_node *>(_end->prev)->data, sizeof(value_type));
+			::operator delete(static_cast<_node *>(_end->prev));
 			if (tmp != _end)
 			{
 				_end->prev = tmp;
@@ -468,8 +483,9 @@ namespace ft
 		iterator insert(iterator position, const value_type &val)
 		{
 			_node_base *tmp = position._pos->prev;
-			position._pos->prev = static_cast<_node_base *>(new _node);
-			_alloc.construct(&static_cast<_node *>(position._pos->prev)->data, val);
+			position._pos->prev = static_cast<_node_base *>(::operator new(sizeof(_node)));
+			static_cast<_node *>(position._pos->prev)->data = _alloc.allocate(1);
+			_alloc.construct(static_cast<_node *>(position._pos->prev)->data, val);
 			position._pos->prev->next = position._pos;
 			position._pos->prev->prev = tmp;
 			tmp->next = position._pos->prev;
@@ -482,13 +498,15 @@ namespace ft
 			if (n > 0)
 			{
 				static_cast<_node_end *>(_end)->size += n;
-				_node_base *start = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(start)->data, val);
+				_node_base *start = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(start)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(start)->data, val);
 				_node_base *curr = start;
 				for (size_type i = 1; i < n; ++i)
 				{
-					_node_base *tmp = static_cast<_node_base *>(new _node);
-					_alloc.construct(&static_cast<_node *>(tmp)->data, val);
+					_node_base *tmp = static_cast<_node_base *>(::operator new(sizeof(_node)));
+					static_cast<_node *>(tmp)->data = _alloc.allocate(1);
+					_alloc.construct(static_cast<_node *>(tmp)->data, val);
 					curr->next = tmp;
 					tmp->prev = curr;
 					curr = tmp;
@@ -505,14 +523,16 @@ namespace ft
 		{
 			if (first != last)
 			{
-				_node_base *start = static_cast<_node_base *>(new _node);
-				_alloc.construct(&static_cast<_node *>(start)->data, *first);
+				_node_base *start = static_cast<_node_base *>(::operator new(sizeof(_node)));
+				static_cast<_node *>(start)->data = _alloc.allocate(1);
+				_alloc.construct(static_cast<_node *>(start)->data, *first);
 				++first;
 				_node_base *curr = start;
 				while (first != last)
 				{
-					_node_base *tmp = static_cast<_node_base *>(new _node);
-					_alloc.construct(&static_cast<_node *>(tmp)->data, *first);
+					_node_base *tmp = static_cast<_node_base *>(::operator new(sizeof(_node)));
+					static_cast<_node *>(tmp)->data = _alloc.allocate(1);
+					_alloc.construct(static_cast<_node *>(tmp)->data, *first);
 					curr->next = tmp;
 					tmp->prev = curr;
 					curr = tmp;
@@ -531,8 +551,9 @@ namespace ft
 			iterator ret(position._pos->next);
 			position._pos->prev->next = position._pos->next;
 			position._pos->next->prev = position._pos->prev;
-			_alloc.destroy(&static_cast<_node *>(position._pos->prev)->data);
-			::operator delete(position._pos);
+			_alloc.destroy(static_cast<_node *>(position._pos)->data);
+			_alloc.deallocate(static_cast<_node *>(position._pos)->data, sizeof(value_type));
+			::operator delete(static_cast<_node *>(position._pos));
 			--(static_cast<_node_end *>(_end)->size);
 			return ret;
 		}
@@ -579,10 +600,10 @@ namespace ft
 			{
 				x._end->next->prev = position._pos->prev;
 				position._pos->prev->next = x._end->next;
-				x._end->next = NULL;
+				x._end->next = x._end;
 				position._pos->prev = x._end->prev;
 				x._end->prev->next = position._pos;
-				x._end->prev = NULL;
+				x._end->prev = x._end;
 				static_cast<_node_end *>(_end)->size += static_cast<_node_end *>(x._end)->size;
 				static_cast<_node_end *>(x._end)->size = 0;
 			}
@@ -602,13 +623,14 @@ namespace ft
 
 		void splice(iterator position, list &x, iterator first, iterator last)
 		{
-			first._pos->prev->next = last._pos->next;
-			last._pos->next->prev = first._pos->prev;
-			last._pos->next = position._pos;
+			iterator tmp(first._pos->prev);
+			tmp._pos->next = last._pos;
 			first._pos->prev = position._pos->prev;
-			position._pos->prev->next = first._pos;
-			position._pos->prev = last._pos;
-			while (first != last)
+			first._pos->prev->next = first._pos;
+			position._pos->prev = last._pos->prev;
+			position._pos->prev->next = position._pos;
+			last._pos->prev = tmp._pos;
+			while (first != position)
 			{
 				++static_cast<_node_end *>(_end)->size;
 				--static_cast<_node_end *>(x._end)->size;
@@ -645,7 +667,7 @@ namespace ft
 			{
 				iterator it(_end->next);
 				while (++it != end())
-					if (*it == static_cast<_node *>(it._pos->prev)->data)
+					if (*it == *(static_cast<_node *>(it._pos->prev)->data))
 						erase(it--);
 			}
 		}
@@ -657,7 +679,7 @@ namespace ft
 			{
 				iterator it(_end->next);
 				while (++it != end())
-					if (binary_pred(*it, static_cast<_node *>(it._pos->prev)->data) == true)
+					if (binary_pred(*it, *(static_cast<_node *>(it._pos->prev)->data)) == true)
 						erase(it--);
 			}
 		}
@@ -666,14 +688,14 @@ namespace ft
 		{
 			if (&x != this)
 			{
-				iterator itx(x._end);
+				iterator itx(x._end->next);
 				iterator it(_end->next);
 
-				while (++itx != x.end())
+				while (itx != x.end())
 				{
-					while (it != end() && *it <= *itx)
+					while (it != end() && (*itx < *it == false))
 						++it;
-					splice(it, x, itx);
+					splice(it, x, itx++);
 				}
 			}
 		}
@@ -683,14 +705,14 @@ namespace ft
 		{
 			if (&x != this)
 			{
-				iterator itx(x._end);
+				iterator itx(x._end->next);
 				iterator it(_end->next);
 
-				while (++itx != x.end())
+				while (itx != x.end())
 				{
-					while (it != end() && comp(*it, *itx) == true)
+					while (it != end() && (comp(*itx, *it) == false))
 						++it;
-					splice(it, x, itx);
+					splice(it, x, itx++);
 				}
 			}
 		}
@@ -786,8 +808,8 @@ namespace ft
 					}
 					size_type n2 = n / 2;
 					iterator e1 = _next<iterator>(f1, n2);
-					iterator ret = f1 = _sort(f1, e1, n2);
-					iterator f2 = e1 = _sort(e1, e2, n - n2);
+					iterator ret = f1 = _sort(f1, e1, n2, comp);
+					iterator f2 = e1 = _sort(e1, e2, n - n2, comp);
 					if (comp(*f2, *f1))
 					{
 						iterator x = _next<iterator>(f2);

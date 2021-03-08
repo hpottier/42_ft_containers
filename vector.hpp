@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/29 08:59:15 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/03 22:21:08 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/08 22:30:27 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ namespace ft
 				return *this;
 			}
 
-			_vector_iterator &operator++(int)
+			_vector_iterator operator++(int)
 			{
 				_vector_iterator tmp = *this;
 				++_elem;
@@ -125,7 +125,7 @@ namespace ft
 				return *this;
 			}
 
-			_vector_iterator &operator--(int)
+			_vector_iterator operator--(int)
 			{
 				_vector_iterator tmp = *this;
 				--_elem;
@@ -241,7 +241,7 @@ namespace ft
 				return *this;
 			}
 
-			_vector_const_iterator &operator++(int)
+			_vector_const_iterator operator++(int)
 			{
 				_vector_const_iterator tmp = *this;
 				++_elem;
@@ -254,7 +254,7 @@ namespace ft
 				return *this;
 			}
 
-			_vector_const_iterator &operator--(int)
+			_vector_const_iterator operator--(int)
 			{
 				_vector_const_iterator tmp = *this;
 				--_elem;
@@ -361,6 +361,7 @@ namespace ft
 			_tab = vecNew(_capacity);
 			for (size_type i = 0; i < _size; ++i)
 				_tab[i] = x._tab[i];
+			return *this;
 		}
 
 		~vector()
@@ -402,22 +403,22 @@ namespace ft
 
 		reverse_iterator rbegin()
 		{
-			return reverse_iterator(iterator(_tab + _size - 1));
+			return reverse_iterator(this->end());
 		}
 
 		const_reverse_iterator rbegin() const
 		{
-			return const_reverse_iterator(const_iterator(_tab + _size - 1));
+			return const_reverse_iterator(this->end());
 		}
 
 		reverse_iterator rend()
 		{
-			return reverse_iterator(iterator(_tab - 1));
+			return reverse_iterator(this->begin());
 		}
 
 		const_reverse_iterator rend() const
 		{
-			return const_reverse_iterator(const_iterator(_tab - 1));
+			return const_reverse_iterator(this->begin());
 		}
 
 		size_type size() const
@@ -460,6 +461,8 @@ namespace ft
 
 		void reserve(size_type n)
 		{
+			if (n > this->max_size())
+				throw std::length_error("vector::reserve");
 			if (n > _capacity)
 				modCapacity(n);
 		}
@@ -477,14 +480,14 @@ namespace ft
 		reference at(size_type n)
 		{
 			if (n >= _size)
-				throw std::out_of_range("ft::vector");
+				throw std::out_of_range("vector::at");
 			return _tab[n];
 		}
 
 		const_reference at(size_type n) const
 		{
 			if (n >= _size)
-				throw std::out_of_range("ft::vector");
+				throw std::out_of_range("vector::at");
 			return _tab[n];
 		}
 
@@ -544,7 +547,7 @@ namespace ft
 		void push_back(const value_type &val)
 		{
 			if (_size + 1 > _capacity)
-				modCapacity(_capacity == 0 ? 2 : _capacity * 2);
+				modCapacity(_capacity == 0 ? 1 : _capacity * 2);
 			_tab[_size] = val;
 			++_size;
 		}
@@ -601,23 +604,36 @@ namespace ft
 
 		iterator erase(iterator position)
 		{
+			iterator ret(position);
 			while (position != end())
 			{
 				*position = *(position + 1);
 				++position;
 			}
+			--_size;
+			return ret;
 		}
 
 		iterator erase(iterator first, iterator last)
 		{
-			iterator tmp = last;
+			iterator ret(first);
+			size_type i = _size;
+			pointer tmp = last._elem;
 
-			while (first != tmp)
+			while (first._elem != tmp)
+			{
+				*first = *last;
+				++first;
+				++last;
+				--_size;
+			}
+			while (first._elem != _tab + i)
 			{
 				*first = *last;
 				++first;
 				++last;
 			}
+			return ret;
 		}
 
 		void swap(vector &x)

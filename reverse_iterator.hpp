@@ -6,12 +6,14 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/12 16:30:24 by hpottier          #+#    #+#             */
-/*   Updated: 2021/02/23 15:46:40 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/08 21:46:36 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REVERSE_ITERATOR_HPP
 #define REVERSE_ITERATOR_HPP
+
+#include "ft_utility.hpp"
 
 namespace ft
 {
@@ -32,7 +34,7 @@ namespace ft
 	public:
 		reverse_iterator() {}
 
-		explicit reverse_iterator(iterator_type it) : _it(it) {}
+		explicit reverse_iterator(iterator_type it) : _it(--it) {}
 
 		reverse_iterator(const reverse_iterator &rev_it) : _it(rev_it._it) {}
 

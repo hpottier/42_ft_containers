@@ -28,5 +28,5 @@ if [[ $? -ne 0 ]]; then
 	exit
 else
 	echo -e "\033[32mEverything is working as intended\033[0m"
-	rm -rf tstd* tft* results.txt
+	# rm -rf tstd* tft* results.txt
 fi
