@@ -559,26 +559,28 @@ namespace ft
 
 		iterator insert(iterator position, const value_type &val)
 		{
+			size_type pos = position._elem - _tab;
 			if (_size + 1 > _capacity)
 				modCapacity(_capacity == 0 ? 2 : _capacity * 2);
-			for (iterator tmp = end(); tmp != position; --tmp)
+			for (iterator tmp = end(); tmp._elem != _tab + pos; --tmp)
 				*tmp = *(tmp - 1);
-			*position = val;
+			*(_tab + pos) = val;
 			++_size;
-			return position;
+			return iterator(_tab + pos);
 		}
 
 		void insert(iterator position, size_type n, const value_type &val)
 		{
+			size_type pos = position._elem - _tab;
 			if (_size + n > _capacity)
 				modCapacity(n + _capacity * 2);
-			for (iterator tmp(&_tab[_size + n]); tmp != position; --tmp)
+			for (iterator tmp(&_tab[_size + n - 1]); tmp._elem != _tab + pos + n - 1; --tmp)
 				*tmp = *(tmp - n);
 			_size += n;
 			while (n)
 			{
-				*position = val;
-				++position;
+				*(_tab + pos) = val;
+				++pos;
 				--n;
 			}
 		}
@@ -586,18 +588,19 @@ namespace ft
 		template <class InputIterator>
 		typename ft::enable_if<ft::is_input_iterator<InputIterator>::value, void>::type insert(iterator position, InputIterator first, InputIterator last)
 		{
+			size_type pos = position._elem - _tab;
 			size_type n = 0;
 			for (InputIterator tmp(first); tmp != last; ++tmp)
 				++n;
 			if (_size + n > _capacity)
 				modCapacity(n + _capacity * 2);
-			for (iterator tmp(&_tab[_size + n]); tmp != position; --tmp)
+			for (iterator tmp(&_tab[_size + n]); tmp._elem != _tab + pos + n - 1; --tmp)
 				*tmp = *(tmp - n);
 			_size += n;
 			while (first != last)
 			{
-				*position = *first;
-				++position;
+				*(_tab + pos) = *first;
+				++pos;
 				++first;
 			}
 		}
@@ -622,12 +625,15 @@ namespace ft
 
 			while (first._elem != tmp)
 			{
-				*first = *last;
+				if (last != this->end())
+				{
+					*first = *last;
+					++last;
+				}
 				++first;
-				++last;
 				--_size;
 			}
-			while (first._elem != _tab + i)
+			while (first._elem != _tab + i && last != this->end())
 			{
 				*first = *last;
 				++first;
