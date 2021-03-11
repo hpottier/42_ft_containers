@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/07 14:52:02 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/08 21:59:02 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/11 14:08:30 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,7 +328,7 @@ namespace ft
 
 		const_reverse_iterator rbegin() const
 		{
-			return reverse_const_iterator(this->end());
+			return const_reverse_iterator(this->end());
 		}
 
 		reverse_iterator rend()
@@ -338,7 +338,7 @@ namespace ft
 
 		const_reverse_iterator rend() const
 		{
-			return reverse_const_iterator(this->begin());
+			return const_reverse_iterator(this->begin());
 		}
 
 		bool empty() const

@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/04 15:55:26 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/11 13:35:17 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/11 14:41:13 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,8 +107,8 @@ void lst_testeur()
 		std::cout << *rit << std::endl;
 		++rit;
 	}
-	// for (NS::list<int>::const_reverse_iterator crit = lst.rbegin(); crit != lst.rend(); ++crit)
-	// 	std::cout << *crit << std::endl;
+	for (NS::list<int>::const_reverse_iterator crit = lst.rbegin(); crit != lst.rend(); ++crit)
+		std::cout << *crit << std::endl;
 	std::cout << std::endl;
 
 	lst.assign(8, 42);

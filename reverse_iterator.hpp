@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/12 16:30:24 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/08 21:46:36 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/11 14:12:53 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,33 @@ namespace ft
 		{
 			_it++;
 			return *this;
+		}
+
+		reverse_iterator operator+(difference_type __n) const
+		{
+			return reverse_iterator(_it - __n);
+		}
+
+		reverse_iterator &operator+=(difference_type __n)
+		{
+			_it -= __n;
+			return *this;
+		}
+
+		reverse_iterator operator-(difference_type __n) const
+		{
+			return reverse_iterator(_it + __n);
+		}
+
+		reverse_iterator &operator-=(difference_type __n)
+		{
+			_it += __n;
+			return *this;
+		}
+
+		reference operator[](difference_type __n) const
+		{
+			return *(*this + __n);
 		}
 	};
 } // namespace ft
