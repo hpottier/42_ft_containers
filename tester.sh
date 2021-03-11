@@ -21,12 +21,12 @@ fi
 ./tstd > tstd.results
 ./tft > tft.results
 
-diff tstd.results tft.results > results.txt
+diff tstd.results tft.results > results.diff
 
 if [[ $? -ne 0 ]]; then
-	echo -e "\033[31mERROR\nsee results.txt\033[0m"
+	echo -e "\033[31mERROR\nsee results.diff\033[0m"
 	exit
 else
 	echo -e "\033[32mEverything is working as intended\033[0m"
-	# rm -rf tstd* tft* results.txt
+	# rm -rf tstd* tft* results.diff
 fi

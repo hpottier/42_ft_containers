@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/29 08:59:15 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/08 22:30:27 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/11 13:29:43 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -620,19 +620,19 @@ namespace ft
 		iterator erase(iterator first, iterator last)
 		{
 			iterator ret(first);
-			// size_type i = _size;
 			pointer tmp = last._elem;
 			size_type i = _size;
 
-			while (last._elem != _tab + _size)	
+			while (last._elem != _tab + i)
 			{
 				*(first._elem) = *(last._elem);
 				++first;
 				++last;
 				if (first._elem <= tmp)
-					--i;
+					--_size;
 			}
-			_size = i;
+			if (first._elem <= tmp)
+				--_size;
 			return ret;
 		}
 
