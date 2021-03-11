@@ -620,25 +620,19 @@ namespace ft
 		iterator erase(iterator first, iterator last)
 		{
 			iterator ret(first);
-			size_type i = _size;
+			// size_type i = _size;
 			pointer tmp = last._elem;
+			size_type i = _size;
 
-			while (first._elem != tmp)
+			while (last._elem != _tab + _size)	
 			{
-				if (last != this->end())
-				{
-					*first = *last;
-					++last;
-				}
-				++first;
-				--_size;
-			}
-			while (first._elem != _tab + i && last != this->end())
-			{
-				*first = *last;
+				*(first._elem) = *(last._elem);
 				++first;
 				++last;
+				if (first._elem <= tmp)
+					--i;
 			}
+			_size = i;
 			return ret;
 		}
 
