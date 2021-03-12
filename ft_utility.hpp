@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/13 11:19:56 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/08 20:35:36 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/12 15:27:49 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,11 +69,14 @@ namespace ft
 
 	/* is_pointer */
 
-	template <typename T>
-	struct is_pointer { static const bool value = false; };
+	template <bool V>
+	struct _value { static const bool value = V; };
 
 	template <typename T>
-	struct is_pointer<T *> { static const bool value = true; };
+	struct is_pointer : public _value<false> {};
+
+	template <typename T>
+	struct is_pointer<T *> : public _value<true> {};
 
 	/* is_input_iterator */
 
@@ -111,14 +114,8 @@ namespace ft
 		static const bool value = sizeof(_test(static_cast<typename T::iterator_category *>(NULL))) == sizeof(_yes);
 	};
 
-	// template <class T>
-	// struct is_input_iterator : public _is_input_iterator<_has_iterator_category<T>::value, T>;
-
 	template <class T>
-	struct is_input_iterator
-	{
-		static const bool value = _is_input_iterator<_has_iterator_category<T>::value, T>::value || is_pointer<T>::value;
-	};
+	struct is_input_iterator : public _value<_is_input_iterator<_has_iterator_category<T>::value, T>::value || is_pointer<T>::value> {};
 
 	/* binary_function */
 

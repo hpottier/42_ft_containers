@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/04 15:55:26 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/11 14:41:13 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/12 17:07:12 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,6 +239,8 @@ void map_testeur()
 		std::cout << (*rit).first << '	' << (*rit).second << std::endl;
 		++rit;
 	}
+	for (NS::map<std::string, int>::const_reverse_iterator crit = m.rbegin(); crit != m.rend(); ++crit)
+		std::cout << (*crit).first << '	' << (*crit).second << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "m size == " << m.size() << std::endl;
@@ -371,6 +373,8 @@ void vector_testeur()
 		std::cout << *rit << std::endl;
 		++rit;
 	}
+	for (NS::vector<int>::const_reverse_iterator crit = vec.rbegin(); crit != vec.rend(); ++crit)
+		std::cout << *crit << std::endl;
 	std::cout << std::endl;
 
 	NS::vector<std::string> svec;

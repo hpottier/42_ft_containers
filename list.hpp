@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/07 14:52:02 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/11 14:08:30 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/12 17:18:55 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,13 @@ namespace ft
 		typedef typename std::ptrdiff_t difference_type;
 
 	private:
+		template <bool IsConst>
 		class _list_iterator;
-		class _list_const_iterator;
+		// class _list_const_iterator;
 
 	public:
-		typedef _list_iterator iterator;
-		typedef _list_const_iterator const_iterator;
+		typedef _list_iterator<false> iterator;
+		typedef _list_iterator<true> const_iterator;
 		typedef typename ft::reverse_iterator<iterator> reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -80,6 +81,7 @@ namespace ft
 			_l->next = _p;
 		}
 
+		template <bool IsConst>
 		class _list_iterator
 		{
 			friend class ft::list<T>;
@@ -100,6 +102,11 @@ namespace ft
 			explicit _list_iterator(_node_base *__x) : _pos(__x) {}
 
 		public:
+			// template <bool WasConst, class = typename ft::enable_if<IsConst || !WasConst>::type>
+			// _list_iterator(const _list_iterator<WasConst> &__x) : _pos(__x._pos) {}
+
+			_list_iterator(const _list_iterator<false> &__x) : _pos(__x._pos) {}
+
 			bool operator==(const _list_iterator &__x) const
 			{
 				return _pos == __x._pos;
@@ -120,33 +127,33 @@ namespace ft
 				return static_cast<_node *>(_pos)->data;
 			}
 
-			_list_iterator &operator++()
+			_list_iterator<IsConst> &operator++()
 			{
 				_pos = _pos->next;
 				return *this;
 			}
 
-			_list_iterator operator++(int)
+			_list_iterator<IsConst> operator++(int)
 			{
-				_list_iterator tmp = *this;
+				_list_iterator<IsConst> tmp = *this;
 				_pos = _pos->next;
 				return tmp;
 			}
 
-			_list_iterator &operator--()
+			_list_iterator<IsConst> &operator--()
 			{
 				_pos = _pos->prev;
 				return *this;
 			}
 
-			_list_iterator operator--(int)
+			_list_iterator<IsConst> operator--(int)
 			{
-				_list_iterator tmp = *this;
+				_list_iterator<IsConst> tmp = *this;
 				_pos = _pos->prev;
 				return tmp;
 			}
 		};
-
+/*
 		class _list_const_iterator
 		{
 			friend class ft::list<T>;
@@ -215,7 +222,7 @@ namespace ft
 				return tmp;
 			}
 		};
-
+*/
 	private:
 		template <typename Tit>
 		static inline Tit _next(Tit ite, size_type n = 1)

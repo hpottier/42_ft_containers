@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/12 16:30:24 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/11 14:12:53 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/12 17:04:25 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ namespace ft
 
 		explicit reverse_iterator(iterator_type it) : _it(--it) {}
 
-		reverse_iterator(const reverse_iterator &rev_it) : _it(rev_it._it) {}
+		template<class IteratorType>
+		reverse_iterator(const reverse_iterator<IteratorType> &rev_it) : _it(rev_it.base()) {}
 
 		bool operator==(const reverse_iterator &__x) const
 		{
