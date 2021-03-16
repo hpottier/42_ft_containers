@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/06 13:14:27 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/08 21:42:14 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/16 14:11:50 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,12 +58,12 @@ namespace ft
 		};
 
 	private:
+		template <class U>
 		class _map_iterator;
-		class _map_const_iterator;
 
 	public:
-		typedef _map_iterator iterator;
-		typedef _map_const_iterator const_iterator;
+		typedef _map_iterator<value_type> iterator;
+		typedef _map_iterator<const value_type> const_iterator;
 		typedef typename ft::reverse_iterator<iterator> reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -81,14 +81,10 @@ namespace ft
 		size_type _size;
 		key_compare _comp;
 
+		template <class U>
 		class _map_iterator
 		{
 			friend class ft::map<Key, T, Compare, Alloc>;
-
-		private:
-			_node *_pos;
-			key_compare _compit;
-			_node *_mend;
 
 		public:
 			typedef std::bidirectional_iterator_tag iterator_category;
@@ -96,13 +92,22 @@ namespace ft
 			typedef typename map::value_type value_type;
 			typedef typename map::pointer pointer;
 			typedef typename map::reference reference;
+			typedef typename map::key_compare key_compare;
 
-			_map_iterator() : _pos() {}
+		private:
+			_node *_pos;
+			key_compare _compit;
+			_node *_mend;
+
+		public:
+			_map_iterator() : _pos(), _compit(), _mend() {}
 
 		private:
 			explicit _map_iterator(_node *__x, key_compare __comp, _node *__end) : _pos(__x), _compit(__comp), _mend(__end) {}
 
 		public:
+			_map_iterator(const _map_iterator<typename ft::remove_const<U>::type> &__x) : _pos(__x._pos), _compit(__x._compit), _mend(__x._mend) {}
+
 			bool operator==(const _map_iterator &__x) const
 			{
 				return _pos == __x._pos;
@@ -123,7 +128,7 @@ namespace ft
 				return &(_pos->data);
 			}
 
-			_map_iterator &operator++()
+			_map_iterator<U> &operator++()
 			{
 				if (_pos->right != NULL)
 				{
@@ -142,9 +147,9 @@ namespace ft
 				return *this;
 			}
 
-			_map_iterator operator++(int)
+			_map_iterator<U> operator++(int)
 			{
-				_map_iterator tmp = *this;
+				_map_iterator<U> tmp = *this;
 				if (_pos->right != NULL)
 				{
 					if (_pos->right->left == NULL || _pos->right == _mend)
@@ -162,7 +167,7 @@ namespace ft
 				return tmp;
 			}
 
-			_map_iterator &operator--()
+			_map_iterator<U> &operator--()
 			{
 				if (_pos == _mend)
 				{
@@ -192,9 +197,9 @@ namespace ft
 				return *this;
 			}
 
-			_map_iterator operator--(int)
+			_map_iterator<U> operator--(int)
 			{
-				_map_iterator tmp = *this;
+				_map_iterator<U> tmp = *this;
 				if (_pos == _mend)
 				{
 					if (_mend->left != NULL)
@@ -216,151 +221,6 @@ namespace ft
 				else if (_pos->origin != NULL)
 				{
 					_node *og = _pos;
-					_pos = _pos->origin;
-					while (_compit(_pos->data.first, og->data.first) == false)
-						_pos = _pos->origin;
-				}
-				return tmp;
-			}
-		};
-
-		class _map_const_iterator
-		{
-			friend class ft::map<Key, T, Compare, Alloc>;
-
-		private:
-			const _node *_pos;
-			key_compare _compit;
-			_node *_mend;
-
-		public:
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef typename std::ptrdiff_t difference_type;
-			typedef typename map::value_type value_type;
-			typedef typename map::const_pointer pointer;
-			typedef typename map::const_reference reference;
-
-			_map_const_iterator() : _pos() {}
-
-		private:
-			explicit _map_const_iterator(const _node *__x, key_compare __comp, _node *__end) : _pos(__x), _compit(__comp), _mend(__end) {}
-
-		public:
-			_map_const_iterator(const iterator &__x) : _pos(__x._pos), _compit(__x._compit), _mend(__x._mend) {}
-
-			bool operator==(const _map_const_iterator &__x) const
-			{
-				return _pos == __x._pos;
-			}
-
-			bool operator!=(const _map_const_iterator &__x) const
-			{
-				return _pos != __x._pos;
-			}
-
-			reference operator*()
-			{
-				return _pos->data;
-			}
-
-			pointer operator->()
-			{
-				return &(_pos->data);
-			}
-
-			_map_const_iterator &operator++()
-			{
-				if (_pos->right != NULL)
-				{
-					if (_pos->right->left == NULL || _pos->right == _mend)
-						_pos = _pos->right;
-					else
-						_pos = ft::map<Key, T, Compare, Alloc>::getleftmostnode(_pos->right);
-				}
-				else if (_pos->origin != NULL)
-				{
-					const _node *og = _pos;
-					_pos = _pos->origin;
-					while (_compit(og->data.first, _pos->data.first) == false)
-						_pos = _pos->origin;
-				}
-				return *this;
-			}
-
-			_map_const_iterator operator++(int)
-			{
-				_map_const_iterator tmp = *this;
-				if (_pos->right != NULL)
-				{
-					if (_pos->right->left == NULL || _pos->right == _mend)
-						_pos = _pos->right;
-					else
-						_pos = ft::map<Key, T, Compare, Alloc>::getleftmostnode(_pos->right);
-				}
-				else if (_pos->origin != NULL)
-				{
-					const _node *og = _pos;
-					_pos = _pos->origin;
-					while (_compit(og->data.first, _pos->data.first) == false)
-						_pos = _pos->origin;
-				}
-				return tmp;
-			}
-
-			_map_const_iterator &operator--()
-			{
-				if (_pos == _mend)
-				{
-					if (_mend->left != NULL)
-						_pos = _mend->left;
-					return *this;
-				}
-				else if (_pos == _mend->right)
-				{
-					_pos = _mend;
-					return *this;
-				}
-				if (_pos->left != NULL)
-				{
-					if (_pos->left->right == NULL)
-						_pos = _pos->left;
-					else
-						_pos = ft::map<Key, T, Compare, Alloc>::getrightmostnode(_pos->left, _mend);
-				}
-				else if (_pos->origin != NULL)
-				{
-					const _node *og = _pos;
-					_pos = _pos->origin;
-					while (_compit(_pos->data.first, og->data.first) == false)
-						_pos = _pos->origin;
-				}
-				return *this;
-			}
-
-			_map_const_iterator operator--(int)
-			{
-				_map_const_iterator tmp = *this;
-				if (_pos == _mend)
-				{
-					if (_mend->left != NULL)
-						_pos = _mend->left;
-					return tmp;
-				}
-				else if (_pos == _mend->right)
-				{
-					_pos = _mend;
-					return tmp;
-				}
-				if (_pos->left != NULL)
-				{
-					if (_pos->left->right == NULL)
-						_pos = _pos->left;
-					else
-						_pos = ft::map<Key, T, Compare, Alloc>::getrightmostnode(_pos->left, _mend);
-				}
-				else if (_pos->origin != NULL)
-				{
-					const _node *og = _pos;
 					_pos = _pos->origin;
 					while (_compit(_pos->data.first, og->data.first) == false)
 						_pos = _pos->origin;

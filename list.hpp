@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/07 14:52:02 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/12 17:18:55 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/16 14:11:06 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,12 @@ namespace ft
 		typedef typename std::ptrdiff_t difference_type;
 
 	private:
-		template <bool IsConst>
+		template <class U>
 		class _list_iterator;
-		// class _list_const_iterator;
 
 	public:
-		typedef _list_iterator<false> iterator;
-		typedef _list_iterator<true> const_iterator;
+		typedef _list_iterator<value_type> iterator;
+		typedef _list_iterator<const value_type> const_iterator;
 		typedef typename ft::reverse_iterator<iterator> reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -81,10 +80,10 @@ namespace ft
 			_l->next = _p;
 		}
 
-		template <bool IsConst>
+		template <class U>
 		class _list_iterator
 		{
-			friend class ft::list<T>;
+			friend class ft::list<T, Alloc>;
 
 		private:
 			_node_base *_pos;
@@ -92,9 +91,9 @@ namespace ft
 		public:
 			typedef std::bidirectional_iterator_tag iterator_category;
 			typedef typename std::ptrdiff_t difference_type;
-			typedef typename list::value_type value_type;
-			typedef typename list::pointer pointer;
-			typedef typename list::reference reference;
+			typedef  U value_type;
+			typedef  U *pointer;
+			typedef  U &reference;
 
 			_list_iterator() : _pos() {}
 
@@ -102,10 +101,7 @@ namespace ft
 			explicit _list_iterator(_node_base *__x) : _pos(__x) {}
 
 		public:
-			// template <bool WasConst, class = typename ft::enable_if<IsConst || !WasConst>::type>
-			// _list_iterator(const _list_iterator<WasConst> &__x) : _pos(__x._pos) {}
-
-			_list_iterator(const _list_iterator<false> &__x) : _pos(__x._pos) {}
+			_list_iterator(const _list_iterator<typename ft::remove_const<U>::type> &__x) : _pos(__x._pos) {}
 
 			bool operator==(const _list_iterator &__x) const
 			{
@@ -127,102 +123,33 @@ namespace ft
 				return static_cast<_node *>(_pos)->data;
 			}
 
-			_list_iterator<IsConst> &operator++()
+			_list_iterator<U> &operator++()
 			{
 				_pos = _pos->next;
 				return *this;
 			}
 
-			_list_iterator<IsConst> operator++(int)
+			_list_iterator<U> operator++(int)
 			{
-				_list_iterator<IsConst> tmp = *this;
+				_list_iterator<U> tmp = *this;
 				_pos = _pos->next;
 				return tmp;
 			}
 
-			_list_iterator<IsConst> &operator--()
+			_list_iterator<U> &operator--()
 			{
 				_pos = _pos->prev;
 				return *this;
 			}
 
-			_list_iterator<IsConst> operator--(int)
+			_list_iterator<U> operator--(int)
 			{
-				_list_iterator<IsConst> tmp = *this;
-				_pos = _pos->prev;
-				return tmp;
-			}
-		};
-/*
-		class _list_const_iterator
-		{
-			friend class ft::list<T>;
-
-		private:
-			const _node_base *_pos;
-
-		public:
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef typename std::ptrdiff_t difference_type;
-			typedef typename list::value_type value_type;
-			typedef typename list::const_pointer pointer;
-			typedef typename list::const_reference reference;
-
-			_list_const_iterator() : _pos() {}
-
-		private:
-			explicit _list_const_iterator(const _node_base *__x) : _pos(__x) {}
-
-		public:
-			_list_const_iterator(const iterator &__x) : _pos(__x._pos) {}
-
-			bool operator==(const _list_const_iterator &__x) const
-			{
-				return _pos == __x._pos;
-			}
-
-			bool operator!=(const _list_const_iterator &__x) const
-			{
-				return _pos != __x._pos;
-			}
-
-			const_reference operator*()
-			{
-				return *(static_cast<const _node *>(_pos)->data);
-			}
-
-			const_pointer operator->()
-			{
-				return static_cast<const _node *>(_pos)->data;
-			}
-
-			_list_const_iterator &operator++()
-			{
-				_pos = _pos->next;
-				return *this;
-			}
-
-			_list_const_iterator operator++(int)
-			{
-				_list_const_iterator tmp = *this;
-				_pos = _pos->next;
-				return tmp;
-			}
-
-			_list_const_iterator &operator--()
-			{
-				_pos = _pos->prev;
-				return *this;
-			}
-
-			_list_const_iterator operator--(int)
-			{
-				_list_const_iterator tmp = *this;
+				_list_iterator<U> tmp = *this;
 				_pos = _pos->prev;
 				return tmp;
 			}
 		};
-*/
+
 	private:
 		template <typename Tit>
 		static inline Tit _next(Tit ite, size_type n = 1)

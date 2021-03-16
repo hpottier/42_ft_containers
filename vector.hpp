@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/29 08:59:15 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/11 13:29:43 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/16 14:11:24 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,13 @@ namespace ft
 		typedef typename std::size_t size_type;
 		typedef typename std::ptrdiff_t difference_type;
 
+	private:
+		template <class U>
 		class _vector_iterator;
-		class _vector_const_iterator;
 
-		typedef _vector_iterator iterator;
-		typedef _vector_const_iterator const_iterator;
+	public:
+		typedef _vector_iterator<value_type> iterator;
+		typedef _vector_iterator<const value_type> const_iterator;
 		typedef typename ft::reverse_iterator<iterator> reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -65,27 +67,30 @@ namespace ft
 			return ret;
 		}
 
-	public:
+		template <class U>
 		class _vector_iterator
 		{
-			friend class vector<T>;
+			friend class vector<T, Alloc>;
+
+		public:
+			typedef std::random_access_iterator_tag iterator_category;
+			typedef typename std::ptrdiff_t difference_type;
+			typedef  U value_type;
+			typedef  U *pointer;
+			typedef  U &reference;
 
 		private:
 			pointer _elem;
 
 		public:
-			typedef std::random_access_iterator_tag iterator_category;
-			typedef typename std::ptrdiff_t difference_type;
-			typedef typename vector::value_type value_type;
-			typedef typename vector::pointer pointer;
-			typedef typename vector::reference reference;
-
 			_vector_iterator() : _elem(NULL) {}
 
 		private:
 			explicit _vector_iterator(pointer _x) : _elem(_x) {}
 
 		public:
+			_vector_iterator(const _vector_iterator<typename ft::remove_const<U>::type> &__x) : _elem(__x._elem) {}
+
 			bool operator==(const _vector_iterator &_x) const
 			{
 				return _elem == _x._elem;
@@ -106,78 +111,78 @@ namespace ft
 				return _elem;
 			}
 
-			_vector_iterator &operator++()
+			_vector_iterator<U> &operator++()
 			{
 				++_elem;
 				return *this;
 			}
 
-			_vector_iterator operator++(int)
+			_vector_iterator<U> operator++(int)
 			{
-				_vector_iterator tmp = *this;
+				_vector_iterator<U> tmp = *this;
 				++_elem;
 				return tmp;
 			}
 
-			_vector_iterator &operator--()
+			_vector_iterator<U> &operator--()
 			{
 				--_elem;
 				return *this;
 			}
 
-			_vector_iterator operator--(int)
+			_vector_iterator<U> operator--(int)
 			{
-				_vector_iterator tmp = *this;
+				_vector_iterator<U> tmp = *this;
 				--_elem;
 				return tmp;
 			}
 
-			_vector_iterator &operator+=(const int n)
+			_vector_iterator<U> &operator+=(const int n)
 			{
 				_elem += n;
 				return *this;
 			}
 
-			_vector_iterator &operator-=(const int n)
+			_vector_iterator<U> &operator-=(const int n)
 			{
 				_elem -= n;
 				return *this;
 			}
 
-			friend _vector_iterator operator+(_vector_iterator lhs, const int n)
+			friend _vector_iterator<U> operator+(_vector_iterator<U> lhs, const int n)
 			{
 				lhs += n;
 				return lhs;
 			}
 
-			friend _vector_iterator operator-(_vector_iterator lhs, const int n)
+			friend _vector_iterator<U> operator-(_vector_iterator<U> lhs, const int n)
 			{
 				lhs -= n;
 				return lhs;
 			}
 
-			_vector_iterator operator-(const _vector_iterator b) const
+			_vector_iterator<U> operator-(const _vector_iterator<U> b) const
 			{
 				b._elem = _elem - b._elem;
 				return b;
 			}
 
-			bool operator<(const _vector_iterator &b) const
+			bool operator<(const _vector_iterator<U> &b) const
 			{
 				return _elem < b._elem;
 			}
 
-			bool operator>(const _vector_iterator &b) const
+			bool operator>(const _vector_iterator<U> &b) const
 			{
 				return b < *this;
 			}
 
-			bool operator<=(const _vector_iterator &b) const
+			bool operator<=(const _vector_iterator<U> &b) const
 			{
 				return !(*this > b);
 			}
 
-			bool operator>=(const _vector_iterator &b) const
+			bool operator>=(const _vector_iterator<U> &b) const
 			{
 				return !(*this < b);
 			}
@@ -193,130 +198,7 @@ namespace ft
 			}
 		};
 
-		class _vector_const_iterator
-		{
-			friend class vector<T>;
-
-		private:
-			const_pointer _elem;
-
-		public:
-			typedef std::random_access_iterator_tag iterator_category;
-			typedef typename std::ptrdiff_t difference_type;
-			typedef typename vector::value_type value_type;
-			typedef typename vector::pointer pointer;
-			typedef typename vector::reference reference;
-
-			_vector_const_iterator() : _elem(NULL) {}
-
-		private:
-			explicit _vector_const_iterator(pointer _x) : _elem(_x) {}
-
-		public:
-			_vector_const_iterator(const iterator &_x) : _elem(_x._elem) {}
-
-			bool operator==(const _vector_const_iterator &_x) const
-			{
-				return _elem == _x._elem;
-			}
-
-			bool operator!=(const _vector_const_iterator &_x) const
-			{
-				return !(*this == _x);
-			}
-
-			const_reference operator*()
-			{
-				return *_elem;
-			}
-
-			const_pointer operator->()
-			{
-				return _elem;
-			}
-
-			_vector_const_iterator &operator++()
-			{
-				++_elem;
-				return *this;
-			}
-
-			_vector_const_iterator operator++(int)
-			{
-				_vector_const_iterator tmp = *this;
-				++_elem;
-				return tmp;
-			}
-
-			_vector_const_iterator &operator--()
-			{
-				--_elem;
-				return *this;
-			}
-
-			_vector_const_iterator operator--(int)
-			{
-				_vector_const_iterator tmp = *this;
-				--_elem;
-				return tmp;
-			}
-
-			_vector_const_iterator &operator+=(const int n)
-			{
-				_elem + n;
-				return *this;
-			}
-
-			_vector_const_iterator &operator-=(const int n)
-			{
-				_elem - n;
-				return *this;
-			}
-
-			friend _vector_const_iterator operator+(_vector_const_iterator lhs, const int n)
-			{
-				lhs += n;
-				return lhs;
-			}
-
-			friend _vector_const_iterator operator-(_vector_const_iterator lhs, const int n)
-			{
-				lhs -= n;
-				return lhs;
-			}
-
-			_vector_const_iterator operator-(const _vector_const_iterator b) const
-			{
-				b._elem = _elem - b._elem;
-				return b;
-			}
-
-			bool operator<(const _vector_const_iterator &b) const
-			{
-				return _elem < b._elem;
-			}
-
-			bool operator>(const _vector_const_iterator &b) const
-			{
-				return b < *this;
-			}
-
-			bool operator<=(const _vector_const_iterator &b) const
-			{
-				return !(*this > b);
-			}
-
-			bool operator>=(const _vector_const_iterator &b) const
-			{
-				return !(*this < b);
-			}
-
-			const_reference operator[](size_type x) const
-			{
-				return *(_elem + x);
-			}
-		};
-
+	public:
 		explicit vector(const allocator_type &alloc = allocator_type()) : _size(0), _capacity(0), _alloc(alloc)
 		{
 			_tab = vecNew(0);
