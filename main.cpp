@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/04 15:55:26 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/12 17:07:12 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/22 12:57:07 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,6 +328,12 @@ void vector_testeur()
 		std::cout << *it << std::endl;
 		++it;
 	}
+	it = vec.begin();
+	it += 6;
+	NS::vector<int>::iterator zit = it - 4;
+	std::cout << it - zit << std::endl;
+	zit = it + 2;
+	std::cout << *zit << *(3 + zit) << std::endl;
 	std::cout << std::endl;
 
 	vec.clear();

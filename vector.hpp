@@ -6,7 +6,7 @@
 /*   By: hpottier <hpottier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/29 08:59:15 by hpottier          #+#    #+#             */
-/*   Updated: 2021/03/16 14:11:24 by hpottier         ###   ########.fr       */
+/*   Updated: 2021/03/22 12:53:37 by hpottier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,16 +155,21 @@ namespace ft
 				return lhs;
 			}
 
+			friend _vector_iterator<U> operator+(const int n, _vector_iterator<U> lhs)
+			{
+				lhs += n;
+				return lhs;
+			}
+
 			friend _vector_iterator<U> operator-(_vector_iterator<U> lhs, const int n)
 			{
 				lhs -= n;
 				return lhs;
 			}
 
-			_vector_iterator<U> operator-(const _vector_iterator<U> b) const
+			difference_type operator-(const _vector_iterator<U> b) const
 			{
-				b._elem = _elem - b._elem;
-				return b;
+				return _elem - b._elem;
 			}
 
 			bool operator<(const _vector_iterator<U> &b) const
