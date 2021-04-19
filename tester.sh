@@ -6,13 +6,13 @@ echo "============================== FT_CONTAINERS TEST ========================
 echo "================================================================================"
 echo -e "\033[0m"
 
-clang++ -Wall -Wextra -Werror -std=c++98 -pedantic -g3 -fsanitize=address main.cpp -o tstd
+g++ -Wall -Wextra -Werror -std=c++98 -pedantic -g3 -fsanitize=address main.cpp -o tstd
 if [[ $? -ne 0 ]]; then
 	echo -e "\033[31mCOMPILATION ERROR\033[0m"
 	exit
 fi
 
-clang++ -Wall -Wextra -Werror -std=c++98 -pedantic -g3 -fsanitize=address -D TFT main.cpp -o tft
+g++ -Wall -Wextra -Werror -std=c++98 -pedantic -g3 -fsanitize=address -D TFT main.cpp -o tft
 if [[ $? -ne 0 ]]; then
 	echo -e "\033[31mCOMPILATION ERROR\033[0m"
 	exit

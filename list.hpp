@@ -157,7 +157,7 @@ namespace ft
 			for (size_type x = 0; x < n; ++x)
 				++ite;
 			return ite;
-		};
+		}
 
 	public:
 		explicit list(const allocator_type &alloc = allocator_type()) : _alloc(alloc)

@@ -194,6 +194,9 @@ void lst_testeur()
 	lstr.insert(itinstr, 42, "Bonjour je suis un str.");
 
 	NS::list<std::string>::const_iterator cit(lstr.begin());
+	NS::list<std::string>::const_iterator cit2(cit);
+
+	std::cout << *cit2 << std::endl;
 
 	while (cit != lstr.end())
 	{

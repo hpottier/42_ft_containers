@@ -320,7 +320,7 @@ namespace ft
 
 		void resize(size_type n, value_type val = value_type())
 		{
-			if (n < _size && n >= 0)
+			if (n < _size)
 				_size = n;
 			else
 			{
