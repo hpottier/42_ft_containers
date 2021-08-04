@@ -36,14 +36,10 @@ namespace ft
 		typedef typename std::size_t size_type;
 		typedef typename std::ptrdiff_t difference_type;
 
-	private:
-		template <class U>
-		class _vector_iterator;
-
 	public:
-		typedef _vector_iterator<value_type> iterator;
-		typedef _vector_iterator<const value_type> const_iterator;
-		typedef typename ft::reverse_iterator<iterator> reverse_iterator;
+		typedef pointer iterator;
+		typedef const_pointer const_iterator;
+		typedef typename std::reverse_iterator<iterator> reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 	private:
@@ -66,142 +62,6 @@ namespace ft
 				_alloc.construct(&(ret[x]), value_type());
 			return ret;
 		}
-
-		template <class U>
-		class _vector_iterator
-		{
-			friend class vector<T, Alloc>;
-
-		public:
-			typedef std::random_access_iterator_tag iterator_category;
-			typedef typename std::ptrdiff_t difference_type;
-			typedef  U value_type;
-			typedef  U *pointer;
-			typedef  U &reference;
-
-		private:
-			pointer _elem;
-
-		public:
-			_vector_iterator() : _elem(NULL) {}
-
-		private:
-			explicit _vector_iterator(pointer _x) : _elem(_x) {}
-
-		public:
-			_vector_iterator(const _vector_iterator<typename ft::remove_const<U>::type> &__x) : _elem(__x._elem) {}
-
-			bool operator==(const _vector_iterator &_x) const
-			{
-				return _elem == _x._elem;
-			}
-
-			bool operator!=(const _vector_iterator &_x) const
-			{
-				return !(*this == _x);
-			}
-
-			reference operator*()
-			{
-				return *_elem;
-			}
-
-			pointer operator->()
-			{
-				return _elem;
-			}
-
-			_vector_iterator<U> &operator++()
-			{
-				++_elem;
-				return *this;
-			}
-
-			_vector_iterator<U> operator++(int)
-			{
-				_vector_iterator<U> tmp = *this;
-				++_elem;
-				return tmp;
-			}
-
-			_vector_iterator<U> &operator--()
-			{
-				--_elem;
-				return *this;
-			}
-
-			_vector_iterator<U> operator--(int)
-			{
-				_vector_iterator<U> tmp = *this;
-				--_elem;
-				return tmp;
-			}
-
-			_vector_iterator<U> &operator+=(const int n)
-			{
-				_elem += n;
-				return *this;
-			}
-
-			_vector_iterator<U> &operator-=(const int n)
-			{
-				_elem -= n;
-				return *this;
-			}
-
-			friend _vector_iterator<U> operator+(_vector_iterator<U> lhs, const int n)
-			{
-				lhs += n;
-				return lhs;
-			}
-
-			friend _vector_iterator<U> operator+(const int n, _vector_iterator<U> lhs)
-			{
-				lhs += n;
-				return lhs;
-			}
-
-			friend _vector_iterator<U> operator-(_vector_iterator<U> lhs, const int n)
-			{
-				lhs -= n;
-				return lhs;
-			}
-
-			difference_type operator-(const _vector_iterator<U> b) const
-			{
-				return _elem - b._elem;
-			}
-
-			bool operator<(const _vector_iterator<U> &b) const
-			{
-				return _elem < b._elem;
-			}
-
-			bool operator>(const _vector_iterator<U> &b) const
-			{
-				return b < *this;
-			}
-
-			bool operator<=(const _vector_iterator<U> &b) const
-			{
-				return !(*this > b);
-			}
-
-			bool operator>=(const _vector_iterator<U> &b) const
-			{
-				return !(*this < b);
-			}
-
-			reference operator[](size_type x)
-			{
-				return *(_elem + x);
-			}
-
-			const_reference operator[](size_type x) const
-			{
-				return *(_elem + x);
-			}
-		};
 
 	public:
 		explicit vector(const allocator_type &alloc = allocator_type()) : _size(0), _capacity(0), _alloc(alloc)
@@ -446,10 +306,10 @@ namespace ft
 
 		iterator insert(iterator position, const value_type &val)
 		{
-			size_type pos = position._elem - _tab;
+			size_type pos = position - _tab;
 			if (_size + 1 > _capacity)
 				modCapacity(_capacity == 0 ? 2 : _capacity * 2);
-			for (iterator tmp = end(); tmp._elem != _tab + pos; --tmp)
+			for (iterator tmp = end(); tmp != _tab + pos; --tmp)
 				*tmp = *(tmp - 1);
 			*(_tab + pos) = val;
 			++_size;
@@ -458,10 +318,10 @@ namespace ft
 
 		void insert(iterator position, size_type n, const value_type &val)
 		{
-			size_type pos = position._elem - _tab;
+			size_type pos = position - _tab;
 			if (_size + n > _capacity)
 				modCapacity(n + _capacity * 2);
-			for (iterator tmp(&_tab[_size + n - 1]); tmp._elem != _tab + pos + n - 1; --tmp)
+			for (iterator tmp(&_tab[_size + n - 1]); tmp != _tab + pos + n - 1; --tmp)
 				*tmp = *(tmp - n);
 			_size += n;
 			while (n)
@@ -475,13 +335,13 @@ namespace ft
 		template <class InputIterator>
 		typename ft::enable_if<ft::is_input_iterator<InputIterator>::value, void>::type insert(iterator position, InputIterator first, InputIterator last)
 		{
-			size_type pos = position._elem - _tab;
+			size_type pos = position - _tab;
 			size_type n = 0;
 			for (InputIterator tmp(first); tmp != last; ++tmp)
 				++n;
 			if (_size + n > _capacity)
 				modCapacity(n + _capacity * 2);
-			for (iterator tmp(&_tab[_size + n]); tmp._elem != _tab + pos + n - 1; --tmp)
+			for (iterator tmp(&_tab[_size + n]); tmp != _tab + pos + n - 1; --tmp)
 				*tmp = *(tmp - n);
 			_size += n;
 			while (first != last)

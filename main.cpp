@@ -320,6 +320,12 @@ void vector_testeur()
 	vec.reserve(72);
 	vec.resize(72, 42);
 
+	NS::vector<int>::reverse_iterator ritq(vec.rbegin());
+	if (ritq < (ritq + 5))
+		std::cout << "true" << std::endl;
+	else
+		std::cout << "false" << std::endl;
+
 	std::cout << vec.at(10) << std::endl;
 	std::cout << vec[10] << std::endl;
 	std::cout << vec.front() << std::endl;

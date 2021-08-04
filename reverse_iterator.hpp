@@ -17,16 +17,40 @@
 
 namespace ft
 {
-	template <class Iterator>
-	class reverse_iterator
+	template <typename T>
+	class _reverse_iterator_base
 	{
 	public:
-		typedef Iterator iterator_type;
+		typedef typename enable_if<_has_iterator_category<T>::value, T>::type iterator_type;
 		typedef typename iterator_type::iterator_category iterator_category;
 		typedef typename iterator_type::value_type value_type;
 		typedef typename iterator_type::difference_type difference_type;
 		typedef typename iterator_type::pointer pointer;
 		typedef typename iterator_type::reference reference;
+	};
+
+	template <typename T>
+	class _reverse_iterator_base<T *>
+	{
+	public:
+		typedef T *iterator_type;
+		typedef typename std::random_access_iterator_tag iterator_category;
+		typedef T value_type;
+		typedef typename std::ptrdiff_t difference_type;
+		typedef T *pointer;
+		typedef T &reference;
+	};
+
+	template <class Iterator>
+	class reverse_iterator
+	{
+	public:
+		typedef typename _reverse_iterator_base<Iterator>::iterator_type iterator_type;
+		typedef typename _reverse_iterator_base<Iterator>::iterator_category iterator_category;
+		typedef typename _reverse_iterator_base<Iterator>::value_type value_type;
+		typedef typename _reverse_iterator_base<Iterator>::difference_type difference_type;
+		typedef typename _reverse_iterator_base<Iterator>::pointer pointer;
+		typedef typename _reverse_iterator_base<Iterator>::reference reference;
 
 	private:
 		iterator_type _it;
@@ -36,7 +60,7 @@ namespace ft
 
 		explicit reverse_iterator(iterator_type it) : _it(--it) {}
 
-		template<class IteratorType>
+		template <class IteratorType>
 		reverse_iterator(const reverse_iterator<IteratorType> &rev_it) : _it(rev_it.base()) {}
 
 		bool operator==(const reverse_iterator &__x) const
